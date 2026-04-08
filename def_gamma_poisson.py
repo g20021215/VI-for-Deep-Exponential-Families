@@ -1,5 +1,4 @@
 # def_gamma_poisson.py
-# Comments in English as requested.
 
 import os
 import math
@@ -31,54 +30,45 @@ def read_vocab(vocab_path: str) -> List[str]:
             vocab.append(line.strip())
     return vocab
 
-
-def read_cpp_dat(file_path: str, vocab_size: Optional[int] = None, dtype=np.float32) -> np.ndarray:
+def read_cpp_dat(file_path, vocab_size=None, dtype=np.float32):
     """
-    Read Blei-style sparse document file.
+    Read Blei C++ matrix format.
 
-    Each line is usually:
-    <num_unique_terms> term_id:count term_id:count ...
+    Format:
+        first line: num_rows num_cols
+        then alternating lines:
+            odd line:  row_no row_nnz
+            even line: col_1 cnt_1 col_2 cnt_2 ...
 
-    Output:
-        X: [num_docs, vocab_size] dense matrix
+    Return:
+        X: dense numpy array of shape [num_rows, num_cols]
     """
-    rows = []
-    max_term_id = -1
-
     with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
-        for line_idx, line in enumerate(f):
-            line = line.strip()
-            if not line:
-                rows.append({})
-                continue
+        lines = [line.strip() for line in f if line.strip()]
 
-            parts = line.split()
-            term_dict = {}
+    num_rows, num_cols = map(int, lines[0].split())
 
-            for item in parts[1:]:
-                if ":" not in item or item == "":
-                    print("BAD:", item)
-                    continue
-                term_id_str, cnt_str = item.split(":")
-                term_id = int(term_id_str)
-                cnt = float(cnt_str)
-                term_dict[term_id] = cnt
-                if term_id > max_term_id:
-                    max_term_id = term_id
+    if vocab_size is not None:
+        num_cols = vocab_size
 
-            rows.append(term_dict)
+    X = np.zeros((num_rows, num_cols), dtype=dtype)
 
-    if vocab_size is None:
-        vocab_size = max_term_id + 1
+    k = 1
+    while k < len(lines):
+        row_info = lines[k].split()
+        row_no = int(row_info[0])
+        row_nnz = int(row_info[1])
 
-    X = np.zeros((len(rows), vocab_size), dtype=dtype)
-    for d, term_dict in enumerate(rows):
-        for term_id, cnt in term_dict.items():
-            if 0 <= term_id < vocab_size:
-                X[d, term_id] = cnt
+        values = list(map(int, lines[k + 1].split()))
+
+        # values format: col_1 cnt_1 col_2 cnt_2 ...
+        for col_no, cnt in zip(values[::2], values[1::2]):
+            if 0 <= row_no < num_rows and 0 <= col_no < num_cols:
+                X[row_no, col_no] = cnt
+
+        k += 2
 
     return X
-
 
 class GammaPoissonDEF(nn.Module):
     """
