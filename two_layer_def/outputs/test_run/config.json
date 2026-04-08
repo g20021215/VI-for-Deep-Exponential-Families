@@ -1,0 +1,10 @@
+{
+  "epochs": 5,
+  "lr_model": 0.005,
+  "lr_variational": 0.01,
+  "n_samples_mc": 3,
+  "weight_decay": 1e-06,
+  "log_every": 25,
+  "device": "cpu",
+  "save_dir": "outputs/test_run"
+}

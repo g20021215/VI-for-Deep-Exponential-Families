@@ -1,0 +1,9 @@
+{
+  "best_elbo": -120.51699829101562,
+  "final_elbo": -121.39436340332031,
+  "best_epoch": 2,
+  "n_samples": 50,
+  "obs_dim": 20,
+  "latent_dim_1": 6,
+  "latent_dim_2": 3
+}
