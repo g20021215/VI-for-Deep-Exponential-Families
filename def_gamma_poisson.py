@@ -56,6 +56,9 @@ def read_cpp_dat(file_path: str, vocab_size: Optional[int] = None, dtype=np.floa
             term_dict = {}
 
             for item in parts[1:]:
+                if ":" not in item or item == "":
+                    print("BAD:", item)
+                    continue
                 term_id_str, cnt_str = item.split(":")
                 term_id = int(term_id_str)
                 cnt = float(cnt_str)
