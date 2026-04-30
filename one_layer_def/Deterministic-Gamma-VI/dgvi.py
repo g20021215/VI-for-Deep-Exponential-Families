@@ -51,6 +51,9 @@ class OneLayerSparseGammaDEF_DeterministicGradientVI(nn.Module):
     Variational family:
         q(z_nk) = Gamma(a_z[n,k], b_z[n,k])
         q(w_ik) = Gamma(a_w_var[i,k], b_w_var[i,k])
+
+    This is deterministic because every epoch uses the full dataset.
+    It is gradient-based because Adam is used to optimize the ELBO proxy.
     """
 
     def __init__(
